@@ -8,7 +8,7 @@
 *
 */
 
-namespace gfksx\ThanksForPosts\core;
+namespace gfksx\thanksforposts\core;
 
 class helper
 {
@@ -143,8 +143,9 @@ class helper
 				}
 				else
 				{
-					$user_list[] = get_username_string('full', $thanker['user_id'], $thanker['username'], $thanker['user_colour']) .
-						(($this->config['thanks_time_view'] && $thanker['thanks_time']) ? ' (' . $this->user->format_date($thanker['thanks_time'], false, ($view == 'print') ? true : false) . ')' : '');
+					$thanks_time_info = (($this->config['thanks_time_view'] && $thanker['thanks_time']) ? $this->user->format_date($thanker['thanks_time'], false, ($view == 'print') ? true : false) : '');
+					$usertname_string_tpl = ($thanks_time_info) ? '<span title="' . $thanks_time_info . '">' . 'USERNAME_STRING' . '<span>' : 'USERNAME_STRING';
+					$user_list[] = str_replace('USERNAME_STRING', get_username_string('full', $thanker['user_id'], $thanker['username'], $thanker['user_colour']), $usertname_string_tpl);
 					$count++;
 				}
 			}
@@ -152,7 +153,7 @@ class helper
 
 		if (!empty($user_list))
 		{
-			$return = implode($user_list, ' &bull; ');
+			$return = implode(', ', $user_list);
 		}
 
 		if ($further_thanks > 0)
@@ -323,7 +324,7 @@ class helper
 	// remove a user's thanks
 	public function delete_thanks($post_id, $forum_id)
 	{
-		// $this->user->add_lang_ext('gfksx/ThanksForPosts', 'thanks_mod');
+		// $this->user->add_lang_ext('gfksx/thanksforposts', 'thanks_mod');
 		$to_id = $this->request->variable('to_id', 0);
 		$forum_id = ($forum_id) ?: $this->request->variable('f', 0);
 		$row = $this->get_post_info($post_id);
@@ -404,7 +405,7 @@ class helper
 	// display the text/image saying either to add or remove thanks
 	public function get_thanks_text($post_id)
 	{
-		// $this->user->add_lang_ext('gfksx/ThanksForPosts', 'thanks_mod');
+		// $this->user->add_lang_ext('gfksx/thanksforposts', 'thanks_mod');
 		if ($this->already_thanked($post_id, $this->user->data['user_id']))
 		{
 			return array(
@@ -455,7 +456,7 @@ class helper
 		$poster_give_count = 0;
 		$poster_limit = isset($this->config['thanks_number']) ? $this->config['thanks_number'] : false;
 
-		// $this->user->add_lang_ext('gfksx/ThanksForPosts', 'thanks_mod');
+		// $this->user->add_lang_ext('gfksx/thanksforposts', 'thanks_mod');
 
 		$sql = 'SELECT poster_id, COUNT(*) AS poster_receive_count
 			FROM ' . $this->thanks_table . '
@@ -663,8 +664,8 @@ class helper
 				'S_THANKS_REPUT_GRAPHIC' 	=> isset($this->config['thanks_reput_graphic']) ? $this->config['thanks_reput_graphic'] : false,
 				'THANKS_REPUT_HEIGHT'		=> isset($this->config['thanks_reput_height']) ? sprintf('%d', $this->config['thanks_reput_height']) : false,
 				'THANKS_REPUT_GRAPHIC_WIDTH'=> isset($this->config['thanks_reput_level']) ? (isset($this->config['thanks_reput_height']) ? sprintf('%d', $this->config['thanks_reput_level']*$this->config['thanks_reput_height']) : false) : false,
-				'THANKS_REPUT_IMAGE' 		=> isset($this->config['thanks_reput_image']) ? $this->phpbb_root_path . $this->config['thanks_reput_image'] : '',
-				'THANKS_REPUT_IMAGE_BACK'	=> isset($this->config['thanks_reput_image_back']) ? $this->phpbb_root_path . $this->config['thanks_reput_image_back'] : '',
+				'THANKS_REPUT_IMAGE' 		=> isset($this->config['thanks_reput_image']) ? generate_board_url() . '/' . $this->config['thanks_reput_image'] : '',
+				'THANKS_REPUT_IMAGE_BACK'	=> isset($this->config['thanks_reput_image_back']) ? generate_board_url() . '/' . $this->config['thanks_reput_image_back'] : '',
 				'S_GLOBAL_POST_THANKS'		=> ($topic_data['topic_type'] == POST_GLOBAL) ? (isset($this->config['thanks_global_post']) ? !$this->config['thanks_global_post'] : true) : false,
 				'U_CLEAR_LIST_THANKS_POST'	=> append_sid("{$this->phpbb_root_path}viewtopic.$this->php_ext", 'f=' . $forum_id . '&amp;p=' . $row['post_id'] . '&amp;list_thanks=post'),
 				'S_MOD_THANKS'				=> $this->auth->acl_get('m_thanks'),
@@ -775,8 +776,8 @@ class helper
 			'S_THANKS_REPUT_GRAPHIC' 	=> isset($this->config['thanks_reput_graphic']) ? $this->config['thanks_reput_graphic'] : false,
 			'THANKS_REPUT_HEIGHT'		=> isset($this->config['thanks_reput_height']) ? sprintf('%d', $this->config['thanks_reput_height']) : false,
 			'THANKS_REPUT_GRAPHIC_WIDTH'=> isset($this->config['thanks_reput_level']) ? (isset($this->config['thanks_reput_height']) ? sprintf('%d', $this->config['thanks_reput_level']*$this->config['thanks_reput_height']) : false) : false,
-			'THANKS_REPUT_IMAGE' 		=> isset($this->config['thanks_reput_image']) ? $this->phpbb_root_path . $this->config['thanks_reput_image'] : '',
-			'THANKS_REPUT_IMAGE_BACK'	=> isset($this->config['thanks_reput_image_back']) ? $this->phpbb_root_path . $this->config['thanks_reput_image_back'] : '',
+			'THANKS_REPUT_IMAGE' 		=> isset($this->config['thanks_reput_image']) ? generate_board_url() . '/' . $this->config['thanks_reput_image'] : '',
+			'THANKS_REPUT_IMAGE_BACK'	=> isset($this->config['thanks_reput_image_back']) ? generate_board_url() . '/' . $this->config['thanks_reput_image_back'] : '',
 		);
 	}
 
@@ -854,8 +855,8 @@ class helper
 			'S_THANKS_REPUT_GRAPHIC'	=> isset($this->config['thanks_reput_graphic']) ? $this->config['thanks_reput_graphic'] : false,
 			'THANKS_REPUT_HEIGHT'		=> isset($this->config['thanks_reput_height']) ? sprintf('%d', $this->config['thanks_reput_height']) : false,
 			'THANKS_REPUT_GRAPHIC_WIDTH'=> isset($this->config['thanks_reput_level']) ? (isset($this->config['thanks_reput_height']) ? sprintf('%d', $this->config['thanks_reput_level']*$this->config['thanks_reput_height']) : false) : false,
-			'THANKS_REPUT_IMAGE'		=> (isset($this->config['thanks_reput_image'])) ? $this->phpbb_root_path . $this->config['thanks_reput_image'] : '',
-			'THANKS_REPUT_IMAGE_BACK'	=> (isset($this->config['thanks_reput_image_back'])) ? $this->phpbb_root_path . $this->config['thanks_reput_image_back'] : '',
+			'THANKS_REPUT_IMAGE'		=> (isset($this->config['thanks_reput_image'])) ? generate_board_url() . '/' . $this->config['thanks_reput_image'] : '',
+			'THANKS_REPUT_IMAGE_BACK'	=> (isset($this->config['thanks_reput_image_back'])) ? generate_board_url() . '/' . $this->config['thanks_reput_image_back'] : '',
 		);
 	}
 
